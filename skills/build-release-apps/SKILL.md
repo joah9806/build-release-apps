@@ -182,6 +182,7 @@ description: 规范应用与网站的架构选型、环境检测、组件库优�
 4. 生产构建。
 5. 对 UI 或前端功能启动应用，在浏览器中验证主要流程和边界情况，并检查控制台错误。
 6. 对打包产物检查文件内容、版本号和启动行为。
+7. 对 Skill 仓库运行 `gh skill publish --dry-run`，确认标准目录、元数据和内容可被发现与发布。
 
 报告实际执行的命令及结果。不得声称未运行的检查已经通过。
 
@@ -247,6 +248,7 @@ description: 规范应用与网站的架构选型、环境检测、组件库优�
 4. 安装后重新检测可执行文件，再运行 `gh --version` 和 `gh auth status`，确认工具可用且登录状态明确。
 5. 若安装后仍找不到 `gh`，先诊断安装路径与 `PATH`，不得再次执行安装。
 6. 已安装但未登录时，引导用户执行 `gh auth login`；不输出、提交或记录访问令牌。
+7. 已安装但缺少 `skill` 子命令时，停止并报告当前版本，不擅自升级或重复安装。
 
 执行发布时：
 
@@ -269,6 +271,27 @@ description: 规范应用与网站的架构选型、环境检测、组件库优�
 - 应用代码的一次确认只覆盖当前这一次修改和明确列出的版本，不视为对未来发布的授权。
 - 文档与 Skill 的自动发布授权仅覆盖当前项目已有 GitHub 仓库，不授权创建新仓库、强制推送、改写历史或覆盖标签。
 
+## 从 GitHub 安装与更新
+
+仓库采用标准 `skills/build-release-apps/SKILL.md` 布局，GitHub CLI 会为安装副本注入来源元数据，以便后续检测更新。以下命令要求 `gh` 已存在、已登录且支持 `skill` 子命令；不自动重复安装或升级 `gh`。
+
+Qoder CN 用户级安装或直接从 GitHub 更新到最新版本：
+
+```bash
+gh skill install joah9806/build-release-apps build-release-apps --dir "$HOME/.qoder-cn/skills" --force
+```
+
+`--dir` 显式指向 Qoder CN 的用户级 Skill 目录，避免依赖 GitHub CLI 对 Qoder 目录的默认扫描。未指定版本时，GitHub CLI 优先使用最新标签 Release，其次使用默认分支 HEAD。`--force` 会覆盖远端来源的 Skill 文件，但保留本地额外文件；有本地定制时先备份。
+
+项目级安装或更新时，将 `--dir "$HOME/.qoder-cn/skills"` 改为 `--dir ".qoder/skills"`。已通过 GitHub CLI 安装并写入来源元数据后，可只检查更新或执行更新：
+
+```bash
+gh skill update --dir "$HOME/.qoder-cn/skills" build-release-apps --dry-run
+gh skill update --dir "$HOME/.qoder-cn/skills" build-release-apps
+```
+
+若 Qoder 使用其他配置根目录，将 `--dir` 指向该实例实际的 `skills` 目录。更新完成后重启 Qoder 或新建会话以加载变更。固定版本时使用 `build-release-apps@vX.Y.Z`；已固定版本的副本会被更新检查跳过，需先取消固定。
+
 ## 完成清单
 
 只有适用项目全部满足时，才标记完成：
@@ -284,6 +307,7 @@ description: 规范应用与网站的架构选型、环境检测、组件库优�
 - [ ] 版本号按规则递增，所有发布产物内部和文件名均带版本号。
 - [ ] 应用代码发布前已确认；文档与 Skill 在验证通过且远端可用时已自动发布。
 - [ ] GitHub CLI 已先检测；仅在缺失时安装，安装后已验证版本与登录状态。
+- [ ] Skill 仓库使用标准目录且通过 `gh skill publish --dry-run`；从 GitHub 安装与更新命令已验证。
 - [ ] 已按要求提交、推送、打标签并发布 Release；失败时已明确记录阻塞点。
 
 最终回复简洁说明：修改内容、删除内容、架构或环境结论、验证结果、版本号、产物位置，以及提交和 Release 状态。
